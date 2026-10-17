@@ -275,6 +275,10 @@ export default function App() {
     return true;
   };
 
+  const handleCancelBooking = (bookingId: string) => {
+    setFacilityBookings((prev) => prev.map((booking) => booking.id === bookingId ? { ...booking, status: 'cancelled' } : booking));
+  };
+
   // Friend Request actions
   const handleAcceptFriendRequest = (requestId: string) => {
     const req = friendRequests.find((r) => r.id === requestId);
@@ -388,14 +392,14 @@ export default function App() {
           : 'bg-gradient-to-b from-[#FFF0F3] via-[#FCE4E8] to-[#F8D2DA] text-[#2C181C]'
       } ${personaScale[personaId] ?? ''}`}
     >
-      <Header
+      {tab !== 'map' && <Header
         personaId={personaId}
         onPersonaChange={setPersonaId}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode((v) => !v)}
-      />
+      />}
 
-      <main className="mx-auto max-w-md px-4 pt-3.5 pb-28">
+      <main className={tab === 'map' ? 'm-0 max-w-none p-0' : 'mx-auto max-w-md px-4 pt-3.5 pb-28'}>
         {tab === 'vibe' && (
           <VibeMatchTab
             onNavigate={(destination) => {
@@ -463,7 +467,7 @@ export default function App() {
             onOpenChat={openMarketChat}
           />
         )}
-        {tab === 'map' && <NeighborhoodMapTab onBack={() => setTab('vibe')} isDarkMode={isDarkMode} onNavigate={(destination) => setTab(destination)} />}
+        {tab === 'map' && <NeighborhoodMapTab onBack={() => setTab('vibe')} isDarkMode={isDarkMode} onOpenBookings={() => setTab('facilities')} />}
         {tab === 'voice' && <VoiceBoxTab history={voiceHistory} onSubmit={(item) => setVoiceHistory((items) => [item, ...items])} onFollowUp={openPropertyChat} />}
         {tab === 'facilities' && (
           <FacilitiesTab
@@ -491,18 +495,19 @@ export default function App() {
             onAcceptFriendRequest={handleAcceptFriendRequest}
             onDeclineFriendRequest={handleDeclineFriendRequest}
             onCancelOutgoingRequest={handleCancelOutgoingRequest}
+            onCancelBooking={handleCancelBooking}
           />
         )}
       </main>
 
-      <footer className="mx-auto max-w-md px-4 pb-20 pt-2 text-center">
+      {tab !== 'map' && <footer className="mx-auto max-w-md px-4 pb-20 pt-2 text-center">
         <p className="flex items-center justify-center gap-1.5 text-xs font-medium text-ink-700/40">
           HomeSweetHome <Heart className="h-3 w-3 fill-rose-400 text-rose-400" /> for Maplewood neighbors
         </p>
-      </footer>
+      </footer>}
 
       {/* Bottom Navigation Bar */}
-      <TabNav
+      {tab !== 'map' && <TabNav
         active={tab}
         onChange={(newTab) => {
           setTab(newTab);
@@ -513,7 +518,7 @@ export default function App() {
         }}
         unreadCount={totalUnread}
         isDarkMode={isDarkMode}
-      />
+      />}
 
       {/* Neighbor Profile Modal */}
       {activeProfile && (

@@ -36,6 +36,7 @@ interface ProfileTabProps {
   onAcceptFriendRequest: (requestId: string) => void;
   onDeclineFriendRequest: (requestId: string) => void;
   onCancelOutgoingRequest: (requestId: string) => void;
+  onCancelBooking: (bookingId: string) => void;
 }
 
 export function ProfileTab({
@@ -53,6 +54,7 @@ export function ProfileTab({
   onAcceptFriendRequest,
   onDeclineFriendRequest,
   onCancelOutgoingRequest,
+  onCancelBooking,
 }: ProfileTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(userProfile.name);
@@ -390,7 +392,7 @@ export function ProfileTab({
           ) : (
             <div className="space-y-2.5">
               {bookings.map((b) => (
-                <div key={b.id} className="rounded-3xl bg-white p-4 shadow-soft border border-[#EB99A7]/30">
+                  <div key={b.id} className="rounded-3xl bg-white p-4 shadow-soft border border-[#EB99A7]/30">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h4 className="font-bold text-sm text-ink-900">{b.facilityName}</h4>
@@ -399,11 +401,12 @@ export function ProfileTab({
                         {b.date} · {b.timeSlot}
                       </p>
                     </div>
-                    <Badge tone="sage">{b.status}</Badge>
+                    <Badge tone={b.status === 'confirmed' ? 'sage' : 'rose'}>{b.status}</Badge>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between text-xs pt-2 border-t border-rose-50">
-                    <span className="text-xs text-ink-700/60">Reservation confirmed</span>
+                    <span className="text-xs text-ink-700/60">{b.status === 'cancelled' ? 'Booking cancelled' : b.status === 'completed' ? 'Booking completed' : 'Reservation confirmed'}</span>
+                    {b.status === 'confirmed' && <button type="button" onClick={() => onCancelBooking(b.id)} className="rounded-xl border border-rose-200 px-3 py-1.5 text-[11px] font-bold text-rose-600 hover:bg-rose-50">Cancel booking</button>}
                   </div>
                 </div>
               ))}
