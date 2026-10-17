@@ -16,6 +16,11 @@ import {
   RotateCw,
   ChevronUp,
   ChevronDown,
+  CalendarDays,
+  HandHeart,
+  Megaphone,
+  UserRound,
+  UsersRound,
 } from 'lucide-react';
 import {
   moments as seedMoments,
@@ -28,6 +33,7 @@ import { Badge } from '@/components/Badge';
 import { cn } from '@/utils/cn';
 
 interface VibeMatchTabProps {
+  onNavigate?: (destination: 'profile' | 'friends' | 'bridge' | 'facilities' | 'voice') => void;
   friendStatuses?: Record<string, 'none' | 'pending' | 'friends'>;
   onToggleFriend?: (neighborId: string) => void;
   onViewProfile?: (neighborId: string) => void;
@@ -49,6 +55,7 @@ function getNeighborIdFromAuthor(author: string): string {
 }
 
 export function VibeMatchTab({
+  onNavigate,
   friendStatuses = {},
   onToggleFriend,
   onViewProfile,
@@ -106,6 +113,43 @@ export function VibeMatchTab({
 
   return (
     <div className="space-y-4 animate-fade-in pb-16">
+      <section aria-label="Quick links" className="space-y-3">
+        <button
+          type="button"
+          onClick={() => onNavigate?.('profile')}
+          className="tap-scale flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-[#CB6375] via-[#EB99A7] to-[#F5B5B8] p-4 text-left text-white shadow-soft transition-all hover:shadow-glow"
+        >
+          <span className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20">
+              <UserRound className="h-5 w-5" />
+            </span>
+            <span className="font-display text-lg font-bold">Profile</span>
+          </span>
+          <ChevronRight className="h-5 w-5" />
+        </button>
+
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            { label: 'Events', destination: 'facilities', icon: <CalendarDays className="h-5 w-5" /> },
+            { label: 'Bridge', destination: 'bridge', icon: <HandHeart className="h-5 w-5" /> },
+            { label: 'Friends', destination: 'friends', icon: <UsersRound className="h-5 w-5" /> },
+            { label: 'Voice Box', destination: 'voice', icon: <Megaphone className="h-5 w-5" /> },
+          ] as const).map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => onNavigate?.(item.destination)}
+              className="tap-scale flex min-h-24 flex-col items-start justify-between gap-3 rounded-3xl border border-[#EB99A7]/35 bg-white p-4 text-left shadow-soft transition-all hover:border-[#CB6375]/60 hover:shadow-glow"
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F4D6D3] to-[#FDF2E1] text-[#CB6375]">
+                {item.icon}
+              </span>
+              <span className="text-sm font-bold text-ink-900">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* Share a thought card with pink gradient border */}
       <section className="rounded-4xl bg-white p-4 shadow-soft border border-[#EB99A7]/40">
         <div className="flex items-center gap-3">

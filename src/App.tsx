@@ -35,6 +35,7 @@ const personaScale: Record<string, string> = {
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('vibe');
+  const [focusVoiceBoxOnOpen, setFocusVoiceBoxOnOpen] = useState(false);
   const [personaId, setPersonaId] = useState('me');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -368,6 +369,16 @@ export default function App() {
       <main className="mx-auto max-w-md px-4 pt-3.5 pb-28">
         {tab === 'vibe' && (
           <VibeMatchTab
+            onNavigate={(destination) => {
+              setActiveConversationId(null);
+              if (destination === 'voice') {
+                setFocusVoiceBoxOnOpen(true);
+                setTab('facilities');
+                return;
+              }
+              setFocusVoiceBoxOnOpen(false);
+              setTab(destination);
+            }}
             friendStatuses={friendStatuses}
             onToggleFriend={handleToggleFriend}
             onViewProfile={handleViewProfile}
@@ -403,14 +414,17 @@ export default function App() {
         )}
         {tab === 'facilities' && (
           <FacilitiesTab
+            focusVoiceBoxOnOpen={focusVoiceBoxOnOpen}
             onBookFacility={handleBookFacility}
             userBookings={facilityBookings}
             onNavigateToProfile={() => setTab('profile')}
             onSubmitFeedback={(item) => setVoiceHistory((items) => [item, ...items])}
           />
         )}
-        {tab === 'profile' && (
+        {(tab === 'profile' || tab === 'friends') && (
           <ProfileTab
+            key={tab}
+            initialSection={tab === 'friends' ? 'friends' : 'posts'}
             userProfile={userProfile}
             onUpdateProfile={(updated) => setUserProfile((prev) => ({ ...prev, ...updated }))}
             friendRequests={friendRequests}
@@ -435,6 +449,7 @@ export default function App() {
         active={tab}
         onChange={(newTab) => {
           setTab(newTab);
+          if (newTab !== 'facilities') setFocusVoiceBoxOnOpen(false);
           if (newTab !== 'messages') {
             setActiveConversationId(null);
           }

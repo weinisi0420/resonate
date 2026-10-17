@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Leaf,
   Laptop,
@@ -48,6 +48,7 @@ const statusTextColor: Record<Facility['status'], string> = {
 };
 
 interface FacilitiesTabProps {
+  focusVoiceBoxOnOpen?: boolean;
   onBookFacility?: (facility: Facility, date: string, timeSlot: string) => boolean;
   userBookings?: FacilityBooking[];
   onNavigateToProfile?: () => void;
@@ -55,11 +56,13 @@ interface FacilitiesTabProps {
 }
 
 export function FacilitiesTab({
+  focusVoiceBoxOnOpen = false,
   onBookFacility,
   userBookings = [],
   onNavigateToProfile,
   onSubmitFeedback,
 }: FacilitiesTabProps) {
+  const voiceBoxRef = useRef<HTMLElement | null>(null);
   const [facilities] = useState<Facility[]>(seedFacilities);
   const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<{
@@ -73,6 +76,14 @@ export function FacilitiesTab({
   const [draft, setDraft] = useState('');
   const [category, setCategory] = useState('Amenities');
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!focusVoiceBoxOnOpen) return;
+    const frame = requestAnimationFrame(() => {
+      voiceBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [focusVoiceBoxOnOpen]);
 
   const handleSubmit = () => {
     if (!draft.trim()) return;
@@ -228,7 +239,7 @@ export function FacilitiesTab({
       )}
 
       {/* Constructive Voice Box */}
-      <section className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-[#F5B5B8]/25 via-white to-[#FDF2E1] p-5 shadow-soft border border-[#EB99A7]/40">
+      <section ref={voiceBoxRef} id="voice-box" className="relative scroll-mt-4 overflow-hidden rounded-4xl bg-gradient-to-br from-[#F5B5B8]/25 via-white to-[#FDF2E1] p-5 shadow-soft border border-[#EB99A7]/40">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-[#CB6375] to-[#EB99A7] text-white shadow-soft">
             <Megaphone className="h-4 w-4" />

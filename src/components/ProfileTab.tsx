@@ -19,6 +19,7 @@ import { Badge } from '@/components/Badge';
 import { cn } from '@/utils/cn';
 
 interface ProfileTabProps {
+  initialSection?: 'posts' | 'friends' | 'bookings' | 'voice';
   userProfile: UserProfile;
   onUpdateProfile: (updated: Partial<UserProfile>) => void;
   friendRequests: FriendRequest[];
@@ -31,6 +32,7 @@ interface ProfileTabProps {
 }
 
 export function ProfileTab({
+  initialSection = 'posts',
   userProfile,
   onUpdateProfile,
   friendRequests,
@@ -48,7 +50,7 @@ export function ProfileTab({
   const [newInterest, setNewInterest] = useState('');
   const [interestsList, setInterestsList] = useState(userProfile.interests);
 
-  const [activeSection, setActiveSection] = useState<'posts' | 'friends' | 'bookings' | 'voice'>('posts');
+  const [activeSection, setActiveSection] = useState<'posts' | 'friends' | 'bookings' | 'voice'>(initialSection);
 
   const incomingRequests = friendRequests.filter((r) => r.type === 'incoming');
   const outgoingRequests = friendRequests.filter((r) => r.type === 'outgoing');
