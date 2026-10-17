@@ -6,13 +6,16 @@ import {
   UserCheck,
   UserX,
   Calendar,
+  Clock,
+  UserPlus,
 } from 'lucide-react';
-import type {
-  UserProfile,
-  FriendRequest,
-  FacilityBooking,
-  Moment,
-  VoiceFeedback,
+import {
+  neighborProfiles,
+  type UserProfile,
+  type FriendRequest,
+  type FacilityBooking,
+  type Moment,
+  type VoiceFeedback,
 } from '@/data/mockData';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
@@ -20,6 +23,9 @@ import { cn } from '@/utils/cn';
 
 interface ProfileTabProps {
   initialSection?: 'posts' | 'friends' | 'bookings' | 'voice';
+  friendStatuses: Record<string, 'none' | 'pending' | 'friends'>;
+  onToggleFriend: (neighborId: string) => void;
+  onViewNeighborProfile: (neighborId: string) => void;
   userProfile: UserProfile;
   onUpdateProfile: (updated: Partial<UserProfile>) => void;
   friendRequests: FriendRequest[];
@@ -33,6 +39,9 @@ interface ProfileTabProps {
 
 export function ProfileTab({
   initialSection = 'posts',
+  friendStatuses,
+  onToggleFriend,
+  onViewNeighborProfile,
   userProfile,
   onUpdateProfile,
   friendRequests,
@@ -320,6 +329,54 @@ export function ProfileTab({
               </div>
             )}
           </div>
+
+          <section>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-display text-sm font-bold text-ink-900">Explore Neighbors</h3>
+              <span className="text-[11px] text-ink-700/50">Nearby</span>
+            </div>
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+              {neighborProfiles.slice(0, 6).map((neighbor) => {
+                const status = friendStatuses[neighbor.id] || neighbor.friendStatus;
+                return (
+                  <article
+                    key={neighbor.id}
+                    className="shrink-0 w-32 rounded-3xl bg-white p-3 shadow-soft border border-[#EB99A7]/30 flex flex-col items-center text-center hover:border-[#CB6375]/50 transition-colors"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onViewNeighborProfile(neighbor.id)}
+                      className="flex w-full flex-col items-center rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CB6375]"
+                      aria-label={`View ${neighbor.name}'s profile`}
+                    >
+                      <Avatar initials={neighbor.initials} color={neighbor.avatarColor} size="md" online={neighbor.online} />
+                      <span className="mt-2 w-full truncate text-xs font-bold text-ink-900">{neighbor.name}</span>
+                      <span className="w-full truncate text-[10px] text-ink-700/60">{neighbor.unit} · {neighbor.distance}m</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => onToggleFriend(neighbor.id)}
+                      className={cn(
+                        'tap-scale mt-2 w-full rounded-xl py-1 px-2 text-[10px] font-bold transition-all shadow-xs flex items-center justify-center gap-1',
+                        status === 'friends' && 'bg-sage-100 text-sage-800',
+                        status === 'pending' && 'bg-amber-50 text-amber-800',
+                        status === 'none' && 'bg-[#FDF2E1] text-rose-600 border border-[#EB99A7]/40 hover:bg-rose-50'
+                      )}
+                    >
+                      {status === 'friends' ? (
+                        <><UserCheck className="h-3 w-3" /> Friends</>
+                      ) : status === 'pending' ? (
+                        <><Clock className="h-3 w-3" /> Sent</>
+                      ) : (
+                        <><UserPlus className="h-3 w-3" /> Add</>
+                      )}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
         </div>
       )}
 

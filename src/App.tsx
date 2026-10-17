@@ -425,6 +425,9 @@ export default function App() {
           <ProfileTab
             key={tab}
             initialSection={tab === 'friends' ? 'friends' : 'posts'}
+            friendStatuses={friendStatuses}
+            onToggleFriend={handleToggleFriend}
+            onViewNeighborProfile={handleViewProfile}
             userProfile={userProfile}
             onUpdateProfile={(updated) => setUserProfile((prev) => ({ ...prev, ...updated }))}
             friendRequests={friendRequests}

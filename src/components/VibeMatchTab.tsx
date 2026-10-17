@@ -25,7 +25,6 @@ import {
 import {
   moments as seedMoments,
   companionMatches,
-  neighborProfiles,
   type Moment,
 } from '@/data/mockData';
 import { Avatar } from '@/components/Avatar';
@@ -317,52 +316,6 @@ export function VibeMatchTab({
               </div>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Explore Neighbors Carousel */}
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="font-display text-sm font-bold text-ink-900">Explore Neighbors</h2>
-          <span className="text-[11px] text-ink-700/50">Tap profile to view details</span>
-        </div>
-        <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
-          {neighborProfiles.slice(0, 6).map((neighbor) => {
-            const status = friendStatuses[neighbor.id] || neighbor.friendStatus;
-            return (
-              <div
-                key={neighbor.id}
-                onClick={() => onViewProfile?.(neighbor.id)}
-                className="tap-scale shrink-0 w-32 rounded-3xl bg-white p-3 shadow-soft border border-[#EB99A7]/30 flex flex-col items-center text-center cursor-pointer hover:border-[#CB6375]/50 transition-colors"
-              >
-                <Avatar initials={neighbor.initials} color={neighbor.avatarColor} size="md" online={neighbor.online} />
-                <h4 className="mt-2 text-xs font-bold text-ink-900 truncate w-full">{neighbor.name}</h4>
-                <p className="text-[10px] text-ink-700/60 truncate w-full">{neighbor.unit} · {neighbor.distance}m</p>
-
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleFriend?.(neighbor.id);
-                  }}
-                  className={cn(
-                    'tap-scale mt-2 w-full rounded-xl py-1 px-2 text-[10px] font-bold transition-all shadow-xs flex items-center justify-center gap-1',
-                    status === 'friends' && 'bg-sage-100 text-sage-800',
-                    status === 'pending' && 'bg-amber-50 text-amber-800',
-                    status === 'none' && 'bg-[#FDF2E1] text-rose-600 border border-[#EB99A7]/40 hover:bg-rose-50'
-                  )}
-                >
-                  {status === 'friends' ? (
-                    <><UserCheck className="h-3 w-3" /> Friends</>
-                  ) : status === 'pending' ? (
-                    <><Clock className="h-3 w-3" /> Sent</>
-                  ) : (
-                    <><UserPlus className="h-3 w-3" /> Add</>
-                  )}
-                </button>
-              </div>
-            );
-          })}
         </div>
       </section>
 
