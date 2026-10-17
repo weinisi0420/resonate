@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream-100 text-ink-800 font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    @apply bg-terracotta-200 text-terracotta-800;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .tap-scale {
+    @apply transition-transform duration-150 active:scale-[0.97];
+  }
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      rgba(224, 122, 95, 0) 0%,
+      rgba(224, 122, 95, 0.12) 50%,
+      rgba(224, 122, 95, 0) 100%
+    );
+    background-size: 200% 100%;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Friendly, readable defaults for all ages */
+* {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Night mode surfaces keep text contrast high while retaining pink accents. */
+.dark .bg-white {
+  background-color: #241d32 !important;
+}
+.dark [class~="bg-white"] {
+  background-color: #241d32 !important;
+}
+.dark .bg-cream-100,
+.dark .bg-cream-200 {
+  background-color: #30263f !important;
+}
+.dark [class*="bg-rose-50"],
+.dark [class*="bg-amber-50"],
+.dark [class*="bg-sage-50"],
+.dark [class*="bg-sage-100"],
+.dark [class*="bg-[#FDF2E1]"] {
+  background-color: #352a40 !important;
+}
+.dark .via-white {
+  --tw-gradient-stops: var(--tw-gradient-from), #2b223b var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+.dark [class*="text-ink-"] {
+  color: #f7eff8 !important;
+}
+.dark [class~="text-rose-600"],
+.dark [class~="text-rose-700"],
+.dark [class~="text-[#CB6375]"] {
+  color: #ffb0c0 !important;
+}
+.dark [class~="text-sage-600"],
+.dark [class~="text-sage-700"] {
+  color: #a9e4c1 !important;
+}
+.dark [class~="text-amber-800"] {
+  color: #ffe0a3 !important;
+}
+.dark [class*="bg-amber-100"] {
+  background-color: #4b3b4d !important;
+}
