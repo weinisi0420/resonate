@@ -1,4 +1,4 @@
-export type TabId = 'vibe' | 'bridge' | 'messages' | 'facilities' | 'profile' | 'friends';
+export type TabId = 'vibe' | 'bridge' | 'map' | 'voice' | 'messages' | 'market' | 'facilities' | 'profile' | 'friends';
 
 export interface Moment {
   id: string;

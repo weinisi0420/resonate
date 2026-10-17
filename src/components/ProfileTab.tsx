@@ -26,6 +26,7 @@ interface ProfileTabProps {
   friendStatuses: Record<string, 'none' | 'pending' | 'friends'>;
   onToggleFriend: (neighborId: string) => void;
   onViewNeighborProfile: (neighborId: string) => void;
+  onOpenChat: (neighborId: string, topic?: string) => void;
   userProfile: UserProfile;
   onUpdateProfile: (updated: Partial<UserProfile>) => void;
   friendRequests: FriendRequest[];
@@ -42,6 +43,7 @@ export function ProfileTab({
   friendStatuses,
   onToggleFriend,
   onViewNeighborProfile,
+  onOpenChat,
   userProfile,
   onUpdateProfile,
   friendRequests,
@@ -59,7 +61,7 @@ export function ProfileTab({
   const [newInterest, setNewInterest] = useState('');
   const [interestsList, setInterestsList] = useState(userProfile.interests);
 
-  const [activeSection, setActiveSection] = useState<'posts' | 'friends' | 'bookings' | 'voice'>(initialSection);
+  const [activeSection, setActiveSection] = useState<'posts' | 'friends' | 'bookings'>(initialSection === 'voice' ? 'posts' : initialSection);
 
   const incomingRequests = friendRequests.filter((r) => r.type === 'incoming');
   const outgoingRequests = friendRequests.filter((r) => r.type === 'outgoing');
@@ -207,9 +209,9 @@ export function ProfileTab({
         )}
       </section>
 
-      <div className="grid grid-cols-4 gap-1 bg-white p-1 rounded-2xl border border-[#EB99A7]/30 shadow-soft">
+      <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded-2xl border border-[#EB99A7]/30 shadow-soft">
         {([
-          ['posts', 'Posts'], ['friends', 'Friends'], ['bookings', 'Spaces'], ['voice', 'Voice Box'],
+          ['posts', 'Posts'], ['friends', 'Friends'], ['bookings', 'Bookings'],
         ] as const).map(([id, label]) => (
           <button key={id} onClick={() => setActiveSection(id)} className={cn('tap-scale px-1 py-2 rounded-xl text-center text-[11px] font-bold transition-all', activeSection === id ? 'bg-gradient-to-r from-[#CB6375] to-[#EB99A7] text-white shadow-soft' : 'text-ink-700/60 hover:text-ink-900')}>
             {label}
@@ -229,27 +231,20 @@ export function ProfileTab({
               <p className="mt-3 text-sm leading-relaxed text-ink-800">{post.text}</p>
             </article>
           ))}
-        </section>
-      )}
-
-      {activeSection === 'voice' && (
-        <section className="space-y-3 animate-slide-up">
-          <h3 className="font-display text-sm font-bold text-ink-900">Voice Box history</h3>
-          {voiceHistory.length === 0 ? (
-            <div className="rounded-3xl bg-white p-6 text-center shadow-soft border border-[#EB99A7]/30 text-xs text-ink-700/60">Your submitted suggestions will appear here.</div>
-          ) : voiceHistory.map((item) => (
-            <article key={item.id} className="rounded-3xl bg-white p-4 shadow-soft border border-[#EB99A7]/30">
-              <div className="flex items-center justify-between gap-3"><h4 className="text-sm font-bold text-ink-900">{item.category}</h4><span className="text-[10px] text-ink-700/50">{item.date}</span></div>
-              <p className="mt-2 text-sm text-ink-800">{item.preview}</p>
-              <p className="mt-2 text-[11px] font-semibold text-sage-700">Submitted</p>
-            </article>
-          ))}
+          <h3 className="pt-2 font-display text-sm font-bold text-ink-900">Voice Box history</h3>
+          {voiceHistory.length === 0 ? <div className="rounded-3xl bg-white p-5 text-center text-xs text-ink-700/60 shadow-soft">Your submitted suggestions will appear here.</div> : voiceHistory.map((item) => <article key={item.id} className="rounded-3xl border border-[#EB99A7]/30 bg-white p-4 shadow-soft"><div className="flex items-center justify-between gap-3"><h4 className="text-sm font-bold text-ink-900">{item.category}</h4><span className="text-[10px] text-ink-700/50">{item.date}</span></div><p className="mt-2 text-sm text-ink-800">{item.preview}</p><p className="mt-2 text-[11px] font-semibold text-sage-700">Submitted</p></article>)}
         </section>
       )}
 
       {/* SECTION 3: PENDING ADD FRIEND LIST */}
       {activeSection === 'friends' && (
         <div className="space-y-4 animate-slide-up">
+          <section className="rounded-4xl border border-[#EB99A7]/50 bg-gradient-to-br from-[#F5B5B8]/35 via-white to-[#F4D6D3]/30 p-4 shadow-soft">
+            <div className="flex items-center justify-between"><span className="rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-3 py-1 text-[11px] font-black text-white">✦ AI Companion</span><span className="text-[10px] font-semibold text-ink-700/50">Nearby match</span></div>
+            <div className="mt-3 flex items-center gap-3"><Avatar initials={neighborProfiles[0].initials} color={neighborProfiles[0].avatarColor} size="lg" online={neighborProfiles[0].online}/><div><h3 className="font-display text-lg font-bold text-ink-900">{neighborProfiles[0].name}</h3><p className="text-xs text-ink-700/60">120m away · 94% vibe match</p></div></div>
+            <p className="mt-3 text-xs leading-relaxed text-ink-800">You both enjoy late-night jazz and indie coffee shops nearby.</p>
+            <div className="mt-3 flex gap-2"><button onClick={() => onToggleFriend(neighborProfiles[0].id)} className="rounded-2xl bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-3 py-2 text-xs font-bold text-white">Add friend</button><button onClick={() => onOpenChat(neighborProfiles[0].id, 'AI Companion match')} className="flex-1 rounded-2xl border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-600">Say hi to Alex</button></div>
+          </section>
           <div>
             <h3 className="font-display text-sm font-bold text-ink-900 mb-2 flex items-center justify-between">
               <span>Incoming Friend Requests</span>

@@ -1,4 +1,4 @@
-import { Home, Building2, MessageSquare, User, UsersRound } from 'lucide-react';
+import { Home, Store, MessageSquare, User, HandHeart } from 'lucide-react';
 import type { TabId } from '@/data/mockData';
 import { cn } from '@/utils/cn';
 
@@ -6,7 +6,6 @@ interface TabNavProps {
   active: TabId;
   onChange: (tab: TabId) => void;
   unreadCount?: number;
-  pendingFriendCount?: number;
   isDarkMode?: boolean;
 }
 
@@ -14,15 +13,14 @@ const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'profile', label: 'Profile', icon: <User className="h-4.5 w-4.5" /> },
   { id: 'messages', label: 'Chat', icon: <MessageSquare className="h-4.5 w-4.5" /> },
   { id: 'vibe', label: 'Home', icon: <Home className="h-5 w-5" /> },
-  { id: 'facilities', label: 'Spaces', icon: <Building2 className="h-4.5 w-4.5" /> },
-  { id: 'friends', label: 'Friends', icon: <UsersRound className="h-4.5 w-4.5" /> },
+  { id: 'market', label: 'Market', icon: <Store className="h-4.5 w-4.5" /> },
+  { id: 'bridge', label: 'Bridge', icon: <HandHeart className="h-4.5 w-4.5" /> },
 ];
 
 export function TabNav({
   active,
   onChange,
   unreadCount = 0,
-  pendingFriendCount = 0,
   isDarkMode = false,
 }: TabNavProps) {
   return (
@@ -61,11 +59,6 @@ export function TabNav({
                   {tab.id === 'messages' && unreadCount > 0 && (
                     <span className="absolute -top-1 -right-2 flex h-4 min-w-[15px] items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white shadow-soft">
                       {unreadCount}
-                    </span>
-                  )}
-                  {tab.id === 'friends' && pendingFriendCount > 0 && (
-                    <span className="absolute -top-1 -right-2 flex h-4 min-w-[15px] items-center justify-center rounded-full bg-amber-500 px-1 text-[9px] font-bold text-white shadow-soft">
-                      {pendingFriendCount}
                     </span>
                   )}
                 </div>

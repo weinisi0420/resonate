@@ -6,6 +6,9 @@ import { VibeMatchTab } from '@/components/VibeMatchTab';
 import { BridgeOfNeedsTab } from '@/components/BridgeOfNeedsTab';
 import { MessagesTab } from '@/components/MessagesTab';
 import { FacilitiesTab } from '@/components/FacilitiesTab';
+import { MarketTab, starterListings, type MarketListing } from '@/components/MarketTab';
+import { NeighborhoodMapTab } from '@/components/NeighborhoodMapTab';
+import { VoiceBoxTab } from '@/components/VoiceBoxTab';
 import { ProfileTab } from '@/components/ProfileTab';
 import { ProfileModal } from '@/components/ProfileModal';
 import {
@@ -66,7 +69,6 @@ export default function App() {
   const [activeProfile, setActiveProfile] = useState<NeighborProfile | null>(null);
 
   const totalUnread = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
-  const pendingIncomingFriendCount = friendRequests.filter((f) => f.type === 'incoming').length;
 
   // Toggle friend status
   const handleToggleFriend = (neighborId: string) => {
@@ -350,6 +352,33 @@ export default function App() {
 
   const [voiceHistory, setVoiceHistory] = useState<VoiceFeedback[]>([]);
   const [ownPosts, setOwnPosts] = useState<Moment[]>([]);
+  const [marketListings, setMarketListings] = useState<MarketListing[]>(starterListings);
+  const currentUserName = userProfile.name.split(' ')[0];
+
+  const openMarketChat = (listing: MarketListing) => {
+    const person = listing.seller;
+    const existing = conversations.find((c) => c.participantName.toLowerCase().includes(person.toLowerCase()));
+    const intro = `Hi ${person}! I’m messaging about “${listing.title}” on the Market.`;
+    const id = existing?.id ?? `c-market-${Date.now()}`;
+    if (existing) {
+      setConversations((prev) => prev.map((c) => c.id === id ? { ...c, topic: `Market: ${listing.title}`, lastMessage: intro, lastTime: 'Just now', unreadCount: 0, messages: [...c.messages, { id: `msg-${Date.now()}`, sender: 'me', text: intro, time: 'Just now' }] } : c));
+    } else {
+      const neighbor = neighborProfiles.find((p) => p.name === person) ?? neighborProfiles[0];
+      const newConv: Conversation = { id, participantId: neighbor.id, participantName: `${person} (${listing.unit})`, participantUnit: listing.unit, participantAvatarColor: listing.avatarColor, participantInitials: listing.initials, online: neighbor.online, topic: `Market: ${listing.title}`, lastMessage: intro, lastTime: 'Just now', unreadCount: 0, messages: [{ id: `msg-${Date.now()}`, sender: 'me', text: intro, time: 'Just now' }] };
+      setConversations((prev) => [newConv, ...prev]);
+    }
+    setActiveConversationId(id);
+    setTab('messages');
+  };
+
+  const openPropertyChat = () => {
+    const id = 'property-office';
+    if (!conversations.some((c) => c.id === id)) {
+      setConversations((prev) => [{ id, participantId: id, participantName: 'Maplewood Property Office', participantUnit: 'Management', participantAvatarColor: 'bg-sage-500', participantInitials: 'MO', online: true, topic: 'Property support', lastMessage: 'How can we help with your request?', lastTime: 'Now', unreadCount: 0, messages: [{ id: 'property-welcome', sender: 'them', text: 'Hello Jordan, how can we help with your request?', time: 'Now' }] }, ...prev]);
+    }
+    setActiveConversationId(id);
+    setTab('messages');
+  };
 
   return (
     <div
@@ -372,8 +401,13 @@ export default function App() {
             onNavigate={(destination) => {
               setActiveConversationId(null);
               if (destination === 'voice') {
-                setFocusVoiceBoxOnOpen(true);
-                setTab('facilities');
+                setFocusVoiceBoxOnOpen(false);
+                setTab('voice');
+                return;
+              }
+              if (destination === 'map' || destination === 'market') {
+                setFocusVoiceBoxOnOpen(false);
+                setTab(destination);
                 return;
               }
               setFocusVoiceBoxOnOpen(false);
@@ -412,6 +446,25 @@ export default function App() {
             onViewProfile={handleViewProfile}
           />
         )}
+        {tab === 'market' && (
+          <MarketTab
+            listings={marketListings}
+            currentUserName={currentUserName}
+            onCreate={(listing) => setMarketListings((prev) => [listing, ...prev])}
+            onWant={(listing) => {
+              setMarketListings((prev) => prev.map((item) => item.id === listing.id ? { ...item, request: 'pending' } : item));
+              const seller = neighborProfiles.find((p) => p.name === listing.seller);
+              setConversations((prev) => prev.map((c) => seller && c.participantId === seller.id ? { ...c, unreadCount: c.unreadCount + 1, lastMessage: `Someone wants your item: ${listing.title}`, lastTime: 'Just now' } : c));
+            }}
+            onDecision={(listing, accepted) => {
+              setMarketListings((prev) => accepted ? prev.filter((item) => item.id !== listing.id) : prev.map((item) => item.id === listing.id ? { ...item, request: 'declined' } : item));
+              if (accepted) openMarketChat(listing);
+            }}
+            onOpenChat={openMarketChat}
+          />
+        )}
+        {tab === 'map' && <NeighborhoodMapTab onBack={() => setTab('vibe')} isDarkMode={isDarkMode} onNavigate={(destination) => setTab(destination)} />}
+        {tab === 'voice' && <VoiceBoxTab history={voiceHistory} onSubmit={(item) => setVoiceHistory((items) => [item, ...items])} onFollowUp={openPropertyChat} />}
         {tab === 'facilities' && (
           <FacilitiesTab
             focusVoiceBoxOnOpen={focusVoiceBoxOnOpen}
@@ -428,6 +481,7 @@ export default function App() {
             friendStatuses={friendStatuses}
             onToggleFriend={handleToggleFriend}
             onViewNeighborProfile={handleViewProfile}
+            onOpenChat={handleOpenChat}
             userProfile={userProfile}
             onUpdateProfile={(updated) => setUserProfile((prev) => ({ ...prev, ...updated }))}
             friendRequests={friendRequests}
@@ -458,7 +512,6 @@ export default function App() {
           }
         }}
         unreadCount={totalUnread}
-        pendingFriendCount={pendingIncomingFriendCount}
         isDarkMode={isDarkMode}
       />
 

@@ -4,27 +4,20 @@ import {
   Send,
   Heart,
   MessageCircle,
-  Sparkles,
   MapPin,
-  Coffee,
-  Music,
+  ChevronRight,
+  CalendarDays,
+  Map,
+  Megaphone,
+  Store,
+  UserRound,
   UserPlus,
   UserCheck,
   Clock,
   MessageSquare,
-  ChevronRight,
-  RotateCw,
-  ChevronUp,
-  ChevronDown,
-  CalendarDays,
-  HandHeart,
-  Megaphone,
-  UserRound,
-  UsersRound,
 } from 'lucide-react';
 import {
   moments as seedMoments,
-  companionMatches,
   type Moment,
 } from '@/data/mockData';
 import { Avatar } from '@/components/Avatar';
@@ -32,7 +25,7 @@ import { Badge } from '@/components/Badge';
 import { cn } from '@/utils/cn';
 
 interface VibeMatchTabProps {
-  onNavigate?: (destination: 'profile' | 'friends' | 'bridge' | 'facilities' | 'voice') => void;
+  onNavigate?: (destination: 'profile' | 'friends' | 'bridge' | 'facilities' | 'voice' | 'market' | 'map') => void;
   friendStatuses?: Record<string, 'none' | 'pending' | 'friends'>;
   onToggleFriend?: (neighborId: string) => void;
   onViewProfile?: (neighborId: string) => void;
@@ -63,23 +56,6 @@ export function VibeMatchTab({
 }: VibeMatchTabProps) {
   const [moments, setMoments] = useState<Moment[]>(seedMoments);
   const [draft, setDraft] = useState('');
-
-  // AI Companion Match state: refresh & minimize
-  const [matchIndex, setMatchIndex] = useState(0);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
-
-  const currentMatch = companionMatches[matchIndex] ?? companionMatches[0];
-  const neighborId = getNeighborIdFromAuthor(currentMatch.name);
-  const matchFriendStatus = friendStatuses[neighborId] || 'none';
-
-  const handleRefreshMatch = () => {
-    setIsSpinning(true);
-    setTimeout(() => {
-      setMatchIndex((prev) => (prev + 1) % companionMatches.length);
-      setIsSpinning(false);
-    }, 350);
-  };
 
   const toggleLike = (id: string) => {
     setMoments((prev) =>
@@ -129,10 +105,10 @@ export function VibeMatchTab({
 
         <div className="grid grid-cols-2 gap-3">
           {([
-            { label: 'Events', destination: 'facilities', icon: <CalendarDays className="h-5 w-5" /> },
-            { label: 'Bridge', destination: 'bridge', icon: <HandHeart className="h-5 w-5" /> },
-            { label: 'Friends', destination: 'friends', icon: <UsersRound className="h-5 w-5" /> },
+            { label: 'Bookings', destination: 'facilities', icon: <CalendarDays className="h-5 w-5" /> },
+            { label: 'Map', destination: 'map', icon: <Map className="h-5 w-5" /> },
             { label: 'Voice Box', destination: 'voice', icon: <Megaphone className="h-5 w-5" /> },
+            { label: 'Market', destination: 'market', icon: <Store className="h-5 w-5" /> },
           ] as const).map((item) => (
             <button
               key={item.label}
@@ -183,139 +159,6 @@ export function VibeMatchTab({
               Share <Send className="h-3.5 w-3.5" />
             </button>
           </div>
-        </div>
-      </section>
-
-      {/* AI Companion Match (Refreshable & Minimizable) with Pink Gradient */}
-      <section className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-[#F5B5B8]/35 via-white to-[#F4D6D3]/30 p-4 shadow-soft border border-[#EB99A7]/50 transition-all duration-300">
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#EB99A7]/20 blur-2xl pointer-events-none" />
-        <div className="absolute -left-6 bottom-0 h-24 w-24 rounded-full bg-[#F5B5B8]/30 blur-2xl pointer-events-none" />
-
-        <div className="relative">
-          {/* Header Row: Title + Refresh Button + Minimize Toggle */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-2.5 py-0.5 text-[11px] font-black text-white shadow-xs">
-                <Sparkles className="h-3 w-3" /> AI Companion
-              </span>
-              <span className="text-[11px] font-medium text-ink-700/50">Updated live</span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              {/* Refresh Match Button */}
-              <button
-                onClick={handleRefreshMatch}
-                className="tap-scale flex items-center gap-1 rounded-full bg-white/90 border border-[#EB99A7]/40 px-2.5 py-1 text-[11px] font-bold text-rose-600 shadow-xs hover:bg-rose-50 transition-colors"
-                title="Find another match"
-              >
-                <RotateCw className={cn('h-3.5 w-3.5', isSpinning && 'animate-spin')} />
-                <span>Next</span>
-              </button>
-
-              {/* Minimize / Expand Toggle */}
-              <button
-                onClick={() => setIsMinimized(!isMinimized)}
-                className="tap-scale rounded-full bg-white/90 border border-[#EB99A7]/40 p-1.5 text-ink-700/60 shadow-xs hover:bg-rose-50 transition-colors"
-                title={isMinimized ? 'Expand Companion Card' : 'Minimize Companion Card'}
-              >
-                {isMinimized ? (
-                  <ChevronDown className="h-3.5 w-3.5 text-rose-600" />
-                ) : (
-                  <ChevronUp className="h-3.5 w-3.5 text-rose-600" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* If Minimized: Compact Pill View */}
-          {isMinimized ? (
-            <div
-              onClick={() => setIsMinimized(false)}
-              className="mt-3 flex items-center justify-between bg-white/80 rounded-2xl p-2.5 border border-[#EB99A7]/30 cursor-pointer hover:bg-white transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <Avatar initials={currentMatch.initials} color={currentMatch.avatarColor} size="sm" online={currentMatch.online} />
-                <div>
-                  <h3 className="font-bold text-xs text-ink-900">{currentMatch.name}</h3>
-                  <p className="text-[10px] text-ink-700/60">{currentMatch.distance}m away · {currentMatch.score}% Vibe Match</p>
-                </div>
-              </div>
-              <span className="text-[11px] font-bold text-rose-600 flex items-center gap-0.5">
-                Expand <ChevronDown className="h-3.5 w-3.5" />
-              </span>
-            </div>
-          ) : (
-            /* If Expanded: Full Match Details */
-            <div className="mt-3.5 animate-slide">
-              <div
-                onClick={() => onViewProfile?.(neighborId)}
-                className="flex items-center gap-3.5 cursor-pointer hover:opacity-90 transition-opacity"
-              >
-                <Avatar initials={currentMatch.initials} color={currentMatch.avatarColor} size="lg" online={currentMatch.online} />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-xl font-bold text-ink-900 flex items-center gap-2">
-                    {currentMatch.name}
-                  </h3>
-                  <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-ink-700/60">
-                    <MapPin className="h-3 w-3 text-rose-500" /> {currentMatch.distance}m away
-                    {currentMatch.online && <span className="text-sage-600 font-semibold"> · Online now</span>}
-                  </p>
-                </div>
-                <ScoreRing score={currentMatch.score} />
-              </div>
-
-              <p className="mt-3 text-xs leading-relaxed text-ink-800 text-balance">
-                {currentMatch.reason}
-              </p>
-
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                {currentMatch.sharedInterests.map((interest) => (
-                  <Badge key={interest} tone="sand">
-                    {interest.toLowerCase().includes('jazz') && <Music className="h-3 w-3" />}
-                    {interest.toLowerCase().includes('coffee') && <Coffee className="h-3 w-3" />}
-                    {interest}
-                  </Badge>
-                ))}
-              </div>
-
-              {/* Action Row: Add Friend & Message */}
-              <div className="mt-3.5 flex items-center gap-2">
-                <button
-                  onClick={() => onToggleFriend?.(neighborId)}
-                  className={cn(
-                    'tap-scale flex items-center gap-1.5 rounded-2xl px-3.5 py-2.5 text-xs font-bold transition-all shadow-soft',
-                    matchFriendStatus === 'friends' && 'bg-sage-100 text-sage-800 border border-sage-200',
-                    matchFriendStatus === 'pending' && 'bg-amber-50 text-amber-800 border border-amber-200',
-                    matchFriendStatus === 'none' && 'bg-gradient-to-r from-[#CB6375] to-[#EB99A7] text-white'
-                  )}
-                >
-                  {matchFriendStatus === 'friends' ? (
-                    <>
-                      <UserCheck className="h-4 w-4 text-sage-600" /> Friends
-                    </>
-                  ) : matchFriendStatus === 'pending' ? (
-                    <>
-                      <Clock className="h-4 w-4 text-amber-600" /> Sent
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="h-4 w-4" /> Add Friend
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={() =>
-                    onOpenChat?.(neighborId, `Matched via Vibe Match (${currentMatch.score}% score)`)
-                  }
-                  className="tap-scale flex-1 flex items-center justify-center gap-1.5 rounded-2xl bg-white text-rose-600 px-3.5 py-2.5 text-xs font-bold shadow-soft hover:shadow-glow border border-[#EB99A7]/40 truncate"
-                >
-                  <MessageSquare className="h-4 w-4 text-rose-500 shrink-0" />
-                  <span className="truncate">Say Hi: &ldquo;{currentMatch.icebreaker}&rdquo;</span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -443,31 +286,3 @@ export function VibeMatchTab({
   );
 }
 
-function ScoreRing({ score }: { score: number }) {
-  const radius = 22;
-  const circ = 2 * Math.PI * radius;
-  const offset = circ - (score / 100) * circ;
-  return (
-    <div className="relative h-14 w-14 shrink-0">
-      <svg className="h-14 w-14 -rotate-90" viewBox="0 0 52 52">
-        <circle cx="26" cy="26" r={radius} fill="none" stroke="#F4D6D3" strokeWidth="4" />
-        <circle
-          cx="26"
-          cy="26"
-          r={radius}
-          fill="none"
-          stroke="#CB6375"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-          className="transition-[stroke-dashoffset] duration-700"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-sm font-black text-[#CB6375] leading-none">{score}%</span>
-        <span className="text-[7px] font-bold uppercase tracking-wider text-slate-400">vibe</span>
-      </div>
-    </div>
-  );
-}
