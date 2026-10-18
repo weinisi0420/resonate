@@ -15,6 +15,7 @@ import {
   UserCheck,
   Clock,
   MessageSquare,
+  Home,
 } from 'lucide-react';
 import {
   moments as seedMoments,
@@ -31,6 +32,7 @@ interface VibeMatchTabProps {
   onViewProfile?: (neighborId: string) => void;
   onOpenChat?: (neighborId: string, topic?: string) => void;
   onCreatePost?: (post: Moment) => void;
+  userName?: string;
 }
 
 function getNeighborIdFromAuthor(author: string): string {
@@ -53,6 +55,7 @@ export function VibeMatchTab({
   onViewProfile,
   onOpenChat,
   onCreatePost,
+  userName = 'Jordan',
 }: VibeMatchTabProps) {
   const [moments, setMoments] = useState<Moment[]>(seedMoments);
   const [draft, setDraft] = useState('');
@@ -96,10 +99,10 @@ export function VibeMatchTab({
         >
           <span className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/50 bg-white/30 shadow-inner backdrop-blur-md">
-              <UserRound className="h-5 w-5 drop-shadow-sm" />
+              <Home className="h-5 w-5 drop-shadow-sm" />
             </span>
           </span>
-          <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 font-display text-lg font-bold">Profile</span>
+          <span className="pointer-events-none absolute left-1/2 flex -translate-x-1/2 flex-col items-center whitespace-nowrap"><span className="text-[9px] font-bold uppercase tracking-[.2em] text-white/80">Welcome back</span><span className="font-display text-lg font-bold">{userName}</span></span>
           <ChevronRight className="h-5 w-5" />
         </button>
 

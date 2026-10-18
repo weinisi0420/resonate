@@ -13,7 +13,7 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
-import { type NeedRequest } from '@/data/mockData';
+import { type NeedRequest, type UserProfile } from '@/data/mockData';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { HelpStatusModal } from '@/components/HelpStatusModal';
@@ -38,6 +38,7 @@ interface BridgeOfNeedsTabProps {
   onAddNeed?: (need: NeedRequest) => void;
   onUpdateStatus?: (needId: string, status: NeedRequest['status'], step?: NeedRequest['progressStep']) => void;
   onOpenChat?: (participantName: string, topic?: string) => void;
+  currentUser: UserProfile;
 }
 
 export function BridgeOfNeedsTab({
@@ -47,16 +48,17 @@ export function BridgeOfNeedsTab({
   onAddNeed,
   onUpdateStatus,
   onOpenChat,
+  currentUser,
 }: BridgeOfNeedsTabProps) {
   const [activeList, setActiveList] = useState<'requests' | 'myHelps'>('requests');
   const [showPostModal, setShowPostModal] = useState(false);
   const [activeStatusNeed, setActiveStatusNeed] = useState<NeedRequest | null>(null);
 
-  const isMine = (need: NeedRequest) => need.author.includes('Jordan') || need.author.includes('You');
-  const didOfferHelp = (need: NeedRequest) => Boolean(need.helper?.includes('Jordan') || need.helper?.includes('You') || need.helperId === 'jordan');
+  const isMine = (need: NeedRequest) => need.author.includes('You') || need.author.includes(currentUser.name);
+  const didOfferHelp = (need: NeedRequest) => Boolean(need.helper?.includes('You') || need.helperId === 'jordan');
   const filteredNeeds = activeList === 'requests'
     ? needs.filter((need) => !isMine(need) && need.status !== 'Fulfilled')
-    : needs.filter((need) => isMine(need) || need.helper?.includes('Jordan'));
+    : needs.filter((need) => isMine(need) || didOfferHelp(need));
 
   return (
     <div className="space-y-4 animate-fade-in pb-24">
@@ -103,7 +105,20 @@ export function BridgeOfNeedsTab({
           filteredNeeds.map((need, idx) => (
             <article
               key={need.id}
-              className="animate-slide-up w-full rounded-4xl bg-white p-4 shadow-soft border border-[#EB99A7]/30 flex items-start gap-3 hover:border-[#CB6375]/50 transition-all"
+              role={need.status === 'In Progress' ? 'button' : undefined}
+              tabIndex={need.status === 'In Progress' ? 0 : undefined}
+              onClick={(event) => {
+                if ((event.target as HTMLElement).closest('button')) return;
+                if (need.status === 'In Progress') setActiveStatusNeed(need);
+              }}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget || need.status !== 'In Progress') return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setActiveStatusNeed(need);
+                }
+              }}
+              className={`animate-slide-up w-full rounded-4xl bg-white p-4 shadow-soft border border-[#EB99A7]/30 flex items-start gap-3 hover:border-[#CB6375]/50 transition-all ${need.status === 'In Progress' ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-400' : ''}`}
               style={{ animationDelay: `${idx * 40}ms` }}
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F4D6D3]/60 text-[#CB6375]">
@@ -118,7 +133,7 @@ export function BridgeOfNeedsTab({
 
                   {/* Clickable in-progress badge */}
                   {need.status === 'Fulfilled' ? (
-                    <Badge tone="sage">{need.helper?.includes('Jordan') ? 'Help Offered' : 'Posted'}</Badge>
+                    <Badge tone="sage">{didOfferHelp(need) ? 'Help Offered' : 'Posted'}</Badge>
                   ) : need.status === 'In Progress' && didOfferHelp(need) ? (
                     <button
                       onClick={() => setActiveStatusNeed(need)}
@@ -148,16 +163,21 @@ export function BridgeOfNeedsTab({
                 </div>
               {/* Bottom Actions */}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-rose-50 pt-2.5">
-                <button
-                  type="button"
-                  onClick={() => onViewProfile?.(need.author)}
-                  className="tap-scale flex items-center gap-2 min-w-0 text-left hover:opacity-85 transition-opacity"
-                >
-                  <Avatar initials={need.initials} color={need.avatarColor} size="sm" />
-                  <span className="text-xs text-ink-700/80 font-bold truncate hover:text-rose-600 transition-colors">
-                    {need.author}
-                  </span>
-                </button>
+                {isMine(need) ? (
+                  <div className="flex min-w-0 items-center gap-2 text-left">
+                    <Avatar initials={currentUser.initials} color={need.avatarColor} size="sm" />
+                    <span className="truncate text-xs font-bold text-ink-700/80">You — {currentUser.name} ({currentUser.unit})</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onViewProfile?.(need.author)}
+                    className="tap-scale flex min-w-0 items-center gap-2 text-left transition-opacity hover:opacity-85"
+                  >
+                    <Avatar initials={need.initials} color={need.avatarColor} size="sm" />
+                    <span className="truncate text-xs font-bold text-ink-700/80 transition-colors hover:text-rose-600">{need.author}</span>
+                  </button>
+                )}
 
                 {activeList === 'requests' && (need.status === 'Open' || (need.status === 'In Progress' && !didOfferHelp(need))) && (
                   <button
@@ -191,7 +211,7 @@ export function BridgeOfNeedsTab({
         <PostNeedModal
           onClose={() => setShowPostModal(false)}
           onSubmit={(n) => {
-            onAddNeed?.(n);
+            onAddNeed?.({ ...n, author: `You — ${currentUser.name} (${currentUser.unit})`, initials: currentUser.initials });
             setShowPostModal(false);
           }}
         />
@@ -201,6 +221,7 @@ export function BridgeOfNeedsTab({
       {activeStatusNeed && (
         <HelpStatusModal
           need={activeStatusNeed}
+          currentUser={currentUser}
           onClose={() => setActiveStatusNeed(null)}
           onOpenChat={(person, topic) => {
             setActiveStatusNeed(null);

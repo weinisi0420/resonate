@@ -161,7 +161,7 @@ export default function App() {
           ? {
               ...n,
               status: 'In Progress',
-              helper: 'You — Jordan (Unit 3B)',
+              helper: `You — ${userProfile.name} (${userProfile.unit})`,
               progressStep: 'doing',
             }
           : n
@@ -414,6 +414,7 @@ export default function App() {
             onViewProfile={handleViewProfile}
             onOpenChat={handleOpenChat}
             onCreatePost={(post) => setOwnPosts((posts) => [post, ...posts])}
+            userName={userProfile.name.split(' ')[0]}
           />
         )}
         {tab === 'bridge' && (
@@ -424,6 +425,7 @@ export default function App() {
             onAddNeed={(newNeed) => setNeeds((prev) => [newNeed, ...prev])}
             onUpdateStatus={handleUpdateHelpStatus}
             onOpenChat={handleOpenChat}
+            currentUser={userProfile}
           />
         )}
         {tab === 'messages' && (

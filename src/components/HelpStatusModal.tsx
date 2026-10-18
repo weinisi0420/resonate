@@ -1,5 +1,5 @@
 import { X, CheckCircle2, Clock, MessageSquare, HandHeart } from 'lucide-react';
-import type { NeedRequest } from '@/data/mockData';
+import type { NeedRequest, UserProfile } from '@/data/mockData';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 
@@ -13,16 +13,24 @@ interface HelpStatusModalProps {
     step?: NeedRequest['progressStep']
   ) => void;
   currentUserId?: string;
+  currentUser: UserProfile;
 }
 
 export function HelpStatusModal({
   need,
+  currentUser,
   onClose,
   onOpenChat,
   onUpdateStatus,
 }: HelpStatusModalProps) {
   const chatPartner = need.author.includes('Jordan') || need.author.includes('You')
     ? need.helper ?? need.author
+    : need.author;
+  const selfIsHelper = Boolean(need.helper?.includes('You') || need.helperId === 'jordan' || !need.helper);
+  const helperLabel = selfIsHelper ? `You — ${currentUser.name} (${currentUser.unit})` : need.helper;
+  const helperInitials = selfIsHelper ? currentUser.initials : (need.helper ?? '').split(' ')[0].slice(0, 2);
+  const requesterLabel = need.author.includes('You') || need.author.includes('Jordan')
+    ? `You — ${currentUser.name} (${currentUser.unit})`
     : need.author;
   const currentStep = need.progressStep ?? (need.status === 'Fulfilled' ? 'approved' : 'doing');
 
@@ -68,7 +76,7 @@ export function HelpStatusModal({
           <p className="mt-1 text-xs text-ink-700/70 leading-relaxed">{need.description}</p>
 
           <div className="mt-2.5 flex items-center justify-between text-xs text-ink-700/60 pt-2 border-t border-rose-100/60">
-            <span>Posted by: <strong>{need.author}</strong></span>
+            <span>Posted by: <strong>{requesterLabel}</strong></span>
           </div>
         </div>
 
@@ -96,9 +104,9 @@ export function HelpStatusModal({
               <div className="flex-1">
                 <p className="text-xs font-bold text-ink-900">Helper connected</p>
                 <div className="mt-1 flex items-center gap-2">
-                  <Avatar initials={(need.helper ?? 'Jordan').split(' ')[0].slice(0, 2)} color="sage" size="sm" />
+                  <Avatar initials={helperInitials || currentUser.initials} color="sage" size="sm" />
                   <span className="text-xs font-semibold text-rose-600">
-                    {need.helper?.split(' (')[0] ?? 'You — Jordan'}
+                    {helperLabel?.split(' (')[0] ?? `You — ${currentUser.name}`}
                   </span>
                 </div>
               </div>
@@ -145,7 +153,7 @@ export function HelpStatusModal({
           </button>
 
           {/* Helper Action: Mark as Finished and request confirmation */}
-          {currentStep === 'doing' && need.status === 'In Progress' && (
+          {need.status === 'In Progress' && currentStep !== 'approved' && (
             <button
               onClick={handleMarkFinished}
               className="tap-scale flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#CB6375] to-[#EB99A7] py-3 px-4 text-xs font-bold text-white shadow-soft transition-all"
