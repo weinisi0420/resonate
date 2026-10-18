@@ -30,16 +30,9 @@ import {
   initialBookings,
 } from '@/data/mockData';
 
-const personaScale: Record<string, string> = {
-  elder: 'text-[17px] [&_*]:!rounded-[1.4rem]',
-  teen: '',
-  me: '',
-};
-
 export default function App() {
   const [tab, setTab] = useState<TabId>('vibe');
   const [focusVoiceBoxOnOpen, setFocusVoiceBoxOnOpen] = useState(false);
-  const [personaId, setPersonaId] = useState('me');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // User profile
@@ -357,6 +350,7 @@ export default function App() {
   const [voiceHistory, setVoiceHistory] = useState<VoiceFeedback[]>([]);
   const [ownPosts, setOwnPosts] = useState<Moment[]>([]);
   const [marketListings, setMarketListings] = useState<MarketListing[]>(starterListings);
+  const [receivedGoods, setReceivedGoods] = useState<MarketListing[]>([]);
   const currentUserName = userProfile.name.split(' ')[0];
 
   const openMarketChat = (listing: MarketListing) => {
@@ -390,11 +384,9 @@ export default function App() {
         isDarkMode
         ? 'dark bg-gradient-to-br from-[#17142B] via-[#302344] to-[#182C3B] text-[#FFF8FE]'
           : 'bg-gradient-to-b from-[#FFF0F3] via-[#FCE4E8] to-[#F8D2DA] text-[#2C181C]'
-      } ${personaScale[personaId] ?? ''}`}
+      }`}
     >
       {tab !== 'map' && <Header
-        personaId={personaId}
-        onPersonaChange={setPersonaId}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode((v) => !v)}
       />}
@@ -453,14 +445,16 @@ export default function App() {
         {tab === 'market' && (
           <MarketTab
             listings={marketListings}
+            receivedGoods={[...receivedGoods, ...marketListings.filter((item) => item.requester === currentUserName && item.request === 'pending' && !receivedGoods.some((received) => received.id === item.id))]}
             currentUserName={currentUserName}
             onCreate={(listing) => setMarketListings((prev) => [listing, ...prev])}
             onWant={(listing) => {
-              setMarketListings((prev) => prev.map((item) => item.id === listing.id ? { ...item, request: 'pending' } : item));
+              setMarketListings((prev) => prev.map((item) => item.id === listing.id ? { ...item, request: 'pending', requester: currentUserName } : item));
               const seller = neighborProfiles.find((p) => p.name === listing.seller);
               setConversations((prev) => prev.map((c) => seller && c.participantId === seller.id ? { ...c, unreadCount: c.unreadCount + 1, lastMessage: `Someone wants your item: ${listing.title}`, lastTime: 'Just now' } : c));
             }}
             onDecision={(listing, accepted) => {
+              if (accepted && listing.requester === currentUserName) setReceivedGoods((items) => [listing, ...items.filter((item) => item.id !== listing.id)]);
               setMarketListings((prev) => accepted ? prev.filter((item) => item.id !== listing.id) : prev.map((item) => item.id === listing.id ? { ...item, request: 'declined' } : item));
               if (accepted) openMarketChat(listing);
             }}

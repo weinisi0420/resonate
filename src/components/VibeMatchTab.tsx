@@ -92,34 +92,35 @@ export function VibeMatchTab({
         <button
           type="button"
           onClick={() => onNavigate?.('profile')}
-          className="tap-scale flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-[#CB6375] via-[#EB99A7] to-[#F5B5B8] p-4 text-left text-white shadow-soft transition-all hover:shadow-glow"
+          className="tap-scale relative isolate flex w-full items-center justify-between overflow-hidden rounded-3xl border border-white/65 bg-white/40 p-4 text-left text-white shadow-soft backdrop-blur-xl transition-all hover:shadow-glow before:absolute before:inset-0 before:-z-10 before:bg-[radial-gradient(ellipse_at_8%_20%,rgba(203,99,117,0.94),transparent_55%),radial-gradient(ellipse_at_76%_14%,rgba(245,181,184,0.92),transparent_50%),radial-gradient(ellipse_at_88%_95%,rgba(192,174,220,0.84),transparent_55%),linear-gradient(115deg,rgba(235,153,167,0.78),rgba(255,236,224,0.72))]"
         >
           <span className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20">
-              <UserRound className="h-5 w-5" />
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/50 bg-white/30 shadow-inner backdrop-blur-md">
+              <UserRound className="h-5 w-5 drop-shadow-sm" />
             </span>
-            <span className="font-display text-lg font-bold">Profile</span>
           </span>
+          <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 font-display text-lg font-bold">Profile</span>
           <ChevronRight className="h-5 w-5" />
         </button>
 
         <div className="grid grid-cols-2 gap-3">
           {([
-            { label: 'Bookings', destination: 'facilities', icon: <CalendarDays className="h-5 w-5" /> },
-            { label: 'Map', destination: 'map', icon: <Map className="h-5 w-5" /> },
-            { label: 'Voice Box', destination: 'voice', icon: <Megaphone className="h-5 w-5" /> },
-            { label: 'Market', destination: 'market', icon: <Store className="h-5 w-5" /> },
+            { label: 'Bookings', description: 'Reserve shared spaces', destination: 'facilities', icon: <CalendarDays className="h-5 w-5" /> },
+            { label: 'Map', description: 'Find places nearby', destination: 'map', icon: <Map className="h-5 w-5" /> },
+            { label: 'Voice Box', description: 'Send feedback to management', destination: 'voice', icon: <Megaphone className="h-5 w-5" /> },
+            { label: 'Market', description: 'Browse neighbor listings', destination: 'market', icon: <Store className="h-5 w-5" /> },
           ] as const).map((item) => (
             <button
               key={item.label}
               type="button"
               onClick={() => onNavigate?.(item.destination)}
-              className="tap-scale flex min-h-24 flex-col items-start justify-between gap-3 rounded-3xl border border-[#EB99A7]/35 bg-white p-4 text-left shadow-soft transition-all hover:border-[#CB6375]/60 hover:shadow-glow"
+              className="tap-scale flex min-h-24 items-center gap-3 rounded-3xl border border-white/75 bg-white/55 p-4 text-left shadow-soft backdrop-blur-xl transition-all hover:border-[#CB6375]/50 hover:bg-white/70 hover:shadow-glow"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F4D6D3] to-[#FDF2E1] text-[#CB6375]">
-                {item.icon}
+              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-gradient-to-br from-white via-[#FFF4F0] to-[#E9DDF3] text-[#CB6375] shadow-[0_5px_12px_rgba(153,82,112,0.14),inset_0_1px_0_rgba(255,255,255,0.95)]">
+                <span className="absolute inset-1 rounded-xl bg-gradient-to-br from-[#F5B5B8]/45 via-transparent to-[#C8B6E2]/45" />
+                <span className="relative drop-shadow-[0_1px_1px_rgba(153,82,112,0.25)]">{item.icon}</span>
               </span>
-              <span className="text-sm font-bold text-ink-900">{item.label}</span>
+              <span className="min-w-0"><span className="block text-sm font-bold text-ink-900">{item.label}</span><span className="mt-1 block text-[10px] leading-snug text-ink-700/65">{item.description}</span></span>
             </button>
           ))}
         </div>

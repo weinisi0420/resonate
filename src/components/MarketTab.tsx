@@ -13,6 +13,7 @@ export interface MarketListing {
   initials: string;
   avatarColor: string;
   request?: 'pending' | 'declined';
+  requester?: string;
 }
 
 interface MarketTabProps {
@@ -22,6 +23,7 @@ interface MarketTabProps {
   onDecision: (listing: MarketListing, accepted: boolean) => void;
   currentUserName: string;
   onOpenChat: (listing: MarketListing) => void;
+  receivedGoods: MarketListing[];
 }
 
 export const starterListings: MarketListing[] = [
@@ -30,15 +32,15 @@ export const starterListings: MarketListing[] = [
   { id: 'market-3', title: 'Board game bundle', description: 'Two family games, all pieces included.', price: 10, image: '', seller: 'Sarah K.', unit: 'Unit 5A', initials: 'Sa', avatarColor: 'bg-rose-500' },
 ];
 
-export function MarketTab({ listings, onCreate, onWant, onDecision, currentUserName, onOpenChat }: MarketTabProps) {
-  const [marketView, setMarketView] = useState<'find' | 'mine'>('find');
+export function MarketTab({ listings, onCreate, onWant, onDecision, currentUserName, onOpenChat, receivedGoods }: MarketTabProps) {
+  const [marketView, setMarketView] = useState<'find' | 'mine' | 'received'>('find');
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [image, setImage] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
-  const visibleListings = marketView === 'mine' ? listings.filter((item) => item.seller === currentUserName) : listings.filter((item) => item.seller !== currentUserName);
+  const visibleListings = marketView === 'mine' ? listings.filter((item) => item.seller === currentUserName) : marketView === 'received' ? receivedGoods : listings.filter((item) => item.seller !== currentUserName);
 
   const publish = (event: React.FormEvent) => {
     event.preventDefault();
@@ -52,17 +54,18 @@ export function MarketTab({ listings, onCreate, onWant, onDecision, currentUserN
       <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-rose-500">Maplewood neighbors</p><h1 className="font-display text-2xl font-black text-ink-900">Market</h1><p className="mt-0.5 text-xs text-ink-700/60">Give good things a new home.</p></div>
       {marketView === 'mine' && <button onClick={() => setShowForm(true)} className="tap-scale flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-3.5 py-2.5 text-xs font-bold text-white shadow-soft"><Plus className="h-4 w-4"/> List an item</button>}
     </header>
-    <div className="grid grid-cols-2 rounded-2xl border border-rose-100 bg-white p-1 shadow-soft" role="tablist" aria-label="Market listings">
-      {([['find', 'Find goods'], ['mine', 'My goods']] as const).map(([view, label]) => <button key={view} role="tab" aria-selected={marketView === view} onClick={() => setMarketView(view)} className={`rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${marketView === view ? 'bg-gradient-to-r from-[#CB6375] to-[#EB99A7] text-white shadow-soft' : 'text-ink-700/65'}`}>{label}</button>)}
+    <div className="grid grid-cols-3 rounded-2xl border border-rose-100 bg-white p-1 shadow-soft" role="tablist" aria-label="Market listings">
+      {([['find', 'Find goods'], ['mine', 'My goods'], ['received', 'Received goods']] as const).map(([view, label]) => <button key={view} role="tab" aria-selected={marketView === view} onClick={() => setMarketView(view)} className={`rounded-xl px-1.5 py-2.5 text-[11px] font-bold transition-all ${marketView === view ? 'bg-gradient-to-r from-[#CB6375] to-[#EB99A7] text-white shadow-soft' : 'text-ink-700/65'}`}>{label}</button>)}
     </div>
-    <div className="flex items-center gap-2 px-1 text-xs font-semibold text-ink-700/60"><Store className="h-4 w-4 text-rose-500"/>{visibleListings.length} items nearby</div>
-    {visibleListings.length === 0 && <div className="rounded-4xl bg-white p-8 text-center shadow-soft"><p className="font-bold text-ink-900">{marketView === 'mine' ? 'No items listed yet' : 'Nothing listed yet'}</p><p className="mt-1 text-sm text-ink-700/60">{marketView === 'mine' ? 'Post an unwanted item for your neighbors.' : 'Check back soon for neighbor listings.'}</p>{marketView === 'mine' && <button onClick={() => setShowForm(true)} className="mt-4 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-4 py-2 text-xs font-bold text-white">List an item</button>}</div>}
+    <div className="flex items-center gap-2 px-1 text-xs font-semibold text-ink-700/60"><Store className="h-4 w-4 text-rose-500"/>{visibleListings.length} {marketView === 'received' ? 'received goods' : 'items nearby'}</div>
+    {visibleListings.length === 0 && <div className="rounded-4xl bg-white p-8 text-center shadow-soft"><p className="font-bold text-ink-900">{marketView === 'mine' ? 'No items listed yet' : marketView === 'received' ? 'No received goods yet' : 'Nothing listed yet'}</p><p className="mt-1 text-sm text-ink-700/60">{marketView === 'mine' ? 'Post an unwanted item for your neighbors.' : marketView === 'received' ? 'Items approved by their sellers will appear here.' : 'Check back soon for neighbor listings.'}</p>{marketView === 'mine' && <button onClick={() => setShowForm(true)} className="mt-4 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-4 py-2 text-xs font-bold text-white">List an item</button>}</div>}
     <div className="space-y-3">
       {visibleListings.map((item) => <article key={item.id} className="overflow-hidden rounded-4xl border border-rose-100/80 bg-white shadow-soft">
         {item.image ? <img src={item.image} alt={item.title} className="h-44 w-full object-cover"/> : <div className="flex h-36 items-center justify-center bg-gradient-to-br from-[#F9E6E8] via-[#F5EAF0] to-[#E7F1EC]"><ImagePlus className="h-8 w-8 text-rose-300"/></div>}
         <div className="space-y-3 p-4">
+          {marketView === 'received' && <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold ${item.request === 'pending' ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>{item.request === 'pending' ? 'Chat started · Awaiting seller' : 'Seller approved'}</span>}
           <div className="flex items-start justify-between gap-3"><div><h2 className="font-display text-lg font-bold text-ink-900">{item.title}</h2><p className="mt-1 text-sm leading-relaxed text-ink-700/70">{item.description}</p></div><span className="shrink-0 rounded-full bg-[#F8E9DA] px-3 py-1.5 text-sm font-black text-rose-700">${item.price}</span></div>
-          <div className="flex items-center justify-between border-t border-rose-50 pt-3"><div className="flex items-center gap-2"><Avatar initials={item.initials} color={item.avatarColor} size="sm"/><div><p className="text-xs font-bold text-ink-900">{item.seller}</p><p className="text-[10px] text-ink-700/55">{item.unit}</p></div></div>{item.seller === currentUserName ? item.request === 'pending' ? <div className="flex items-center gap-1.5"><button onClick={() => onDecision(item, false)} className="rounded-full border border-rose-200 px-3 py-2 text-[11px] font-semibold text-rose-600">Decline</button><button onClick={() => onDecision(item, true)} className="flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-2 text-[11px] font-bold text-white"><Check className="h-3.5 w-3.5"/>Accept</button></div> : item.request === 'declined' ? <span className="rounded-full bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600">Declined</span> : <span className="text-[11px] font-semibold text-ink-700/50">Your listing</span> : item.request === 'pending' ? <button onClick={() => onOpenChat(item)} className="rounded-full bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-800">Request sent · Chat</button> : <button onClick={() => { onWant(item); onOpenChat(item); }} className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-4 py-2.5 text-xs font-bold text-white shadow-soft"><MessageCircle className="h-3.5 w-3.5"/>I want this</button>}</div>
+          <div className="flex items-center justify-between border-t border-rose-50 pt-3"><div className="flex items-center gap-2"><Avatar initials={item.initials} color={item.avatarColor} size="sm"/><div><p className="text-xs font-bold text-ink-900">{item.seller}</p><p className="text-[10px] text-ink-700/55">{item.unit}</p></div></div>{marketView === 'received' ? <button onClick={() => onOpenChat(item)} className="rounded-full bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-700">Message seller</button> : item.seller === currentUserName ? item.request === 'pending' ? <div className="flex items-center gap-1.5"><button onClick={() => onDecision(item, false)} className="rounded-full border border-rose-200 px-3 py-2 text-[11px] font-semibold text-rose-600">Decline</button><button onClick={() => onDecision(item, true)} className="flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-2 text-[11px] font-bold text-white"><Check className="h-3.5 w-3.5"/>Accept</button></div> : item.request === 'declined' ? <span className="rounded-full bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600">Declined</span> : <span className="text-[11px] font-semibold text-ink-700/50">Your listing</span> : item.request === 'pending' ? <button onClick={() => onOpenChat(item)} className="rounded-full bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-800">Request sent · Chat</button> : <button onClick={() => { onWant(item); onOpenChat(item); }} className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-4 py-2.5 text-xs font-bold text-white shadow-soft"><MessageCircle className="h-3.5 w-3.5"/>I want this</button>}</div>
         </div>
       </article>)}
     </div>

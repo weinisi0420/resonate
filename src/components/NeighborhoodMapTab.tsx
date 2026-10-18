@@ -8,7 +8,7 @@ interface NeighborhoodMapTabProps {
 }
 
 type Destination = { x: number; y: number };
-type PlaceCategory = 'Towers' | 'Facilities' | 'Food & drinks';
+type PlaceCategory = 'All' | 'Towers' | 'Facilities' | 'Food & drinks';
 
 const mockPlaces = [
   { name: 'Tower A', x: 18, y: 24, kind: 'home', category: 'Towers' as PlaceCategory, detail: 'Residential tower · 6 floors', walk: 2 },
@@ -27,14 +27,14 @@ const mockPlaces = [
 export function NeighborhoodMapTab({ onBack, isDarkMode = false, onOpenBookings }: NeighborhoodMapTabProps) {
   const [destination, setDestination] = useState<Destination | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [activeCategory, setActiveCategory] = useState<PlaceCategory>('Towers');
+  const [activeCategory, setActiveCategory] = useState<PlaceCategory>('All');
   const [selectedPlace, setSelectedPlace] = useState<(typeof mockPlaces)[number] | null>(null);
 
   const placePin = (event: React.MouseEvent<HTMLDivElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
     setDestination({
-      x: Math.max(2, Math.min(98, ((event.clientX - bounds.left) / bounds.width) * 100)),
-      y: Math.max(2, Math.min(98, ((event.clientY - bounds.top) / bounds.height) * 100)),
+      x: Math.max(2, Math.min(98, 50 + (((event.clientX - bounds.left) / bounds.width) * 100 - 50) / zoom)),
+      y: Math.max(2, Math.min(98, 50 + (((event.clientY - bounds.top) / bounds.height) * 100 - 50) / zoom)),
     });
   };
 
@@ -46,8 +46,9 @@ export function NeighborhoodMapTab({ onBack, isDarkMode = false, onOpenBookings 
     <div className={`fixed inset-0 z-50 flex justify-center overflow-hidden ${isDarkMode ? 'bg-[#171725]/45' : 'bg-[#2C181C]/20'}`}>
       <div className={`relative h-full w-full max-w-md overflow-hidden shadow-2xl ${isDarkMode ? 'bg-[#171725]' : 'bg-[#EDE9DF]'}`}>
       <div className="absolute inset-0 cursor-crosshair overflow-hidden" onClick={placePin} aria-label="Map. Click to choose a destination.">
+        <div className="absolute inset-0 transition-transform duration-300" style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}>
         {/* Mock map tiles and orderly neighborhood blocks */}
-        <div className={`absolute inset-0 transition-transform duration-300`} style={{ transform: `scale(${zoom})`, backgroundImage: isDarkMode ? 'linear-gradient(#34354a 1px, transparent 1px), linear-gradient(90deg, #34354a 1px, transparent 1px)' : 'linear-gradient(#ffffff99 1px, transparent 1px), linear-gradient(90deg, #ffffff99 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
+        <div className="absolute inset-0" style={{ backgroundImage: isDarkMode ? 'linear-gradient(#34354a 1px, transparent 1px), linear-gradient(90deg, #34354a 1px, transparent 1px)' : 'linear-gradient(#ffffff99 1px, transparent 1px), linear-gradient(90deg, #ffffff99 1px, transparent 1px)', backgroundSize: '64px 64px' }} />
         <div className={`absolute left-[6%] top-[16%] h-[24%] w-[37%] rounded-[38%] ${isDarkMode ? 'bg-[#25483F]' : 'bg-[#CFE2CD]'}`} style={{ backgroundImage: isDarkMode ? 'radial-gradient(#8ED4A855 1px, transparent 1.5px)' : 'radial-gradient(#67976A55 1px, transparent 1.5px)', backgroundSize: '12px 12px' }} />
         <div className={`absolute left-[8%] top-[38%] h-10 w-[86%] border-y-[5px] ${road}`} />
         <div className={`absolute left-[8%] top-[67%] h-10 w-[86%] border-y-[5px] ${road}`} />
@@ -59,7 +60,7 @@ export function NeighborhoodMapTab({ onBack, isDarkMode = false, onOpenBookings 
           <path d="M15 20 C21 24 30 17 39 23" fill="none" stroke={isDarkMode ? '#C9C5B4' : '#FFF8E7'} strokeWidth="1.2" strokeLinecap="round" />
         </svg>
 
-        {mockPlaces.map((place) => <button type="button" key={place.name} onClick={(event) => { event.stopPropagation(); setSelectedPlace(place); setActiveCategory(place.category); }} aria-label={`View ${place.name}`} className={`absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 transition-all duration-200 ${place.category === activeCategory ? 'scale-105 opacity-100' : 'scale-90 opacity-25 grayscale'}`} style={{ left: `${place.x}%`, top: `${place.y}%` }}>
+        {mockPlaces.map((place) => <button type="button" key={place.name} onClick={(event) => { event.stopPropagation(); setSelectedPlace(place); setActiveCategory(place.category); }} aria-label={`View ${place.name}`} className={`absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 transition-all duration-200 ${activeCategory === 'All' || place.category === activeCategory ? 'scale-105 opacity-100' : 'scale-90 opacity-25 grayscale'}`} style={{ left: `${place.x}%`, top: `${place.y}%` }}>
           <span className={`flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-lg ${place.kind === 'park' ? 'bg-[#639579]' : place.kind === 'home' ? 'bg-[#CB6375]' : place.kind === 'shop' ? 'bg-[#B9844C]' : place.kind === 'cafe' ? 'bg-[#9A725D]' : 'bg-[#5999A6]'}`}>{place.kind === 'park' ? <Trees className="h-4 w-4"/> : place.kind === 'shop' ? <Store className="h-4 w-4"/> : place.kind === 'cafe' ? <Coffee className="h-4 w-4"/> : <Building2 className="h-4 w-4"/>}</span>
           <span className={`whitespace-nowrap rounded-full px-2 py-1 text-[10px] font-bold shadow ${isDarkMode ? 'bg-[#211F31]/95 text-white' : 'bg-white/95 text-ink-800'}`}>{place.name}</span>
         </button>)}
@@ -75,6 +76,7 @@ export function NeighborhoodMapTab({ onBack, isDarkMode = false, onOpenBookings 
         </div>
 
         {destination && <div className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-full" style={{ left: `${destination.x}%`, top: `${destination.y}%` }}><MapPin className="h-9 w-9 fill-[#2563EB] text-white drop-shadow-lg"/><span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-full bg-blue-700 px-2 py-1 text-[10px] font-bold text-white shadow">Destination</span></div>}
+        </div>
       </div>
 
       <header className={`absolute left-3 right-3 top-3 z-40 flex items-center gap-3 rounded-3xl border p-3 shadow-lg backdrop-blur-md ${isDarkMode ? 'border-[#55435D] bg-[#1C1A2B]/90 text-white' : 'border-rose-100 bg-white/90 text-ink-900'}`} onClick={(event) => event.stopPropagation()}>
@@ -84,7 +86,7 @@ export function NeighborhoodMapTab({ onBack, isDarkMode = false, onOpenBookings 
       </header>
 
       <nav aria-label="Map place categories" className="absolute left-3 right-3 top-[6.4rem] z-40 flex gap-2 overflow-x-auto rounded-2xl border border-rose-100 bg-white/90 p-1.5 shadow-lg backdrop-blur-md" onClick={(event) => event.stopPropagation()}>
-        {(['Towers', 'Facilities', 'Food & drinks'] as const).map((category) => <button key={category} type="button" onClick={() => { setActiveCategory(category); setSelectedPlace(null); }} className={`shrink-0 rounded-xl px-3 py-2 text-xs font-bold transition-colors ${activeCategory === category ? 'bg-gradient-to-r from-[#CB6375] to-[#EB99A7] text-white shadow-soft' : 'text-ink-700/55'}`}>{category}</button>)}
+        {(['All', 'Towers', 'Facilities', 'Food & drinks'] as const).map((category) => <button key={category} type="button" onClick={() => { setActiveCategory(category); setSelectedPlace(null); }} className={`shrink-0 rounded-xl px-3 py-2 text-xs font-bold transition-colors ${activeCategory === category ? 'bg-gradient-to-r from-[#CB6375] to-[#EB99A7] text-white shadow-soft' : 'text-ink-700/55'}`}>{category}</button>)}
       </nav>
 
       {selectedPlace && <section className={`absolute bottom-[4.6rem] left-3 right-3 z-40 rounded-3xl border p-4 shadow-xl backdrop-blur-md ${isDarkMode ? 'border-[#55435D] bg-[#1C1A2B]/95 text-white' : 'border-rose-100 bg-white/95 text-ink-900'}`} onClick={(event) => event.stopPropagation()} aria-live="polite">

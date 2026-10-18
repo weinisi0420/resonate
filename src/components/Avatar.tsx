@@ -12,6 +12,7 @@ interface AvatarProps {
   size?: 'sm' | 'md' | 'lg';
   online?: boolean;
   className?: string;
+  imageUrl?: string;
 }
 
 const sizeMap = {
@@ -20,7 +21,7 @@ const sizeMap = {
   lg: 'h-16 w-16 text-lg',
 };
 
-export function Avatar({ initials, color, size = 'md', online, className }: AvatarProps) {
+export function Avatar({ initials, color, size = 'md', online, className, imageUrl }: AvatarProps) {
   return (
     <div className={cn('relative shrink-0', className)}>
       <div
@@ -30,7 +31,7 @@ export function Avatar({ initials, color, size = 'md', online, className }: Avat
           colorMap[color] ?? colorMap.terracotta
         )}
       >
-        {initials}
+        {imageUrl ? <img src={imageUrl} alt="Profile" className={cn('h-full w-full rounded-2xl object-cover', sizeMap[size].split(' ')[0], sizeMap[size].split(' ')[1])} /> : initials}
       </div>
       {online && (
         <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-cream-100 bg-sage-400" />

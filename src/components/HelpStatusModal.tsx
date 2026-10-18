@@ -21,7 +21,9 @@ export function HelpStatusModal({
   onOpenChat,
   onUpdateStatus,
 }: HelpStatusModalProps) {
-  const isJordanHelper = need.helper?.includes('Jordan') || need.helperId === 'jordan';
+  const chatPartner = need.author.includes('Jordan') || need.author.includes('You')
+    ? need.helper ?? need.author
+    : need.author;
   const currentStep = need.progressStep ?? (need.status === 'Fulfilled' ? 'approved' : 'doing');
 
   const handleMarkFinished = () => {
@@ -94,9 +96,9 @@ export function HelpStatusModal({
               <div className="flex-1">
                 <p className="text-xs font-bold text-ink-900">Helper connected</p>
                 <div className="mt-1 flex items-center gap-2">
-                  <Avatar initials="Jo" color="terracotta" size="sm" />
+                  <Avatar initials={(need.helper ?? 'Jordan').split(' ')[0].slice(0, 2)} color="sage" size="sm" />
                   <span className="text-xs font-semibold text-rose-600">
-                    {need.helper ?? 'You — Jordan (Unit 3B)'}
+                    {need.helper?.split(' (')[0] ?? 'You — Jordan'}
                   </span>
                 </div>
               </div>
@@ -134,19 +136,16 @@ export function HelpStatusModal({
           <button
             onClick={() => {
               onClose();
-              onOpenChat(
-                isJordanHelper ? need.author : need.helper ?? need.author,
-                `Helping with: ${need.title}`
-              );
+              onOpenChat(chatPartner, `Helping with: ${need.title}`);
             }}
             className="tap-scale flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#EB99A7]/40 py-2.5 px-4 text-xs font-bold text-rose-600 shadow-soft hover:bg-rose-50 transition-colors"
           >
             <MessageSquare className="h-4 w-4" />
-            <span>Chat with {isJordanHelper ? need.author.split(' ')[0] : (need.helper ? need.helper.split(' ')[0] : 'Neighbor')}</span>
+            <span>Chat with {chatPartner.split(' ')[0]}</span>
           </button>
 
           {/* Helper Action: Mark as Finished and request confirmation */}
-          {isJordanHelper && currentStep === 'doing' && (
+          {currentStep === 'doing' && need.status === 'In Progress' && (
             <button
               onClick={handleMarkFinished}
               className="tap-scale flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#CB6375] to-[#EB99A7] py-3 px-4 text-xs font-bold text-white shadow-soft transition-all"

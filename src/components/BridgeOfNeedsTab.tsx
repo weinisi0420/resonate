@@ -53,6 +53,7 @@ export function BridgeOfNeedsTab({
   const [activeStatusNeed, setActiveStatusNeed] = useState<NeedRequest | null>(null);
 
   const isMine = (need: NeedRequest) => need.author.includes('Jordan') || need.author.includes('You');
+  const didOfferHelp = (need: NeedRequest) => Boolean(need.helper?.includes('Jordan') || need.helper?.includes('You') || need.helperId === 'jordan');
   const filteredNeeds = activeList === 'requests'
     ? needs.filter((need) => !isMine(need) && need.status !== 'Fulfilled')
     : needs.filter((need) => isMine(need) || need.helper?.includes('Jordan'));
@@ -118,7 +119,7 @@ export function BridgeOfNeedsTab({
                   {/* Clickable in-progress badge */}
                   {need.status === 'Fulfilled' ? (
                     <Badge tone="sage">{need.helper?.includes('Jordan') ? 'Help Offered' : 'Posted'}</Badge>
-                  ) : need.status === 'In Progress' ? (
+                  ) : need.status === 'In Progress' && didOfferHelp(need) ? (
                     <button
                       onClick={() => setActiveStatusNeed(need)}
                       className="tap-scale flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full hover:bg-amber-200 transition-colors"
@@ -158,7 +159,7 @@ export function BridgeOfNeedsTab({
                   </span>
                 </button>
 
-                {activeList === 'requests' && need.status === 'Open' && (
+                {activeList === 'requests' && (need.status === 'Open' || (need.status === 'In Progress' && !didOfferHelp(need))) && (
                   <button
                     onClick={() => onOfferHelp?.(need)}
                     className="tap-scale flex items-center gap-1.5 shrink-0 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-3.5 py-2 text-xs font-bold text-white shadow-soft transition-all"
@@ -168,7 +169,7 @@ export function BridgeOfNeedsTab({
                   </button>
                 )}
 
-                {need.status === 'In Progress' && (
+                {need.status === 'In Progress' && didOfferHelp(need) && (
                   <button
                     onClick={() => setActiveStatusNeed(need)}
                     className="tap-scale flex items-center gap-1 shrink-0 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors"

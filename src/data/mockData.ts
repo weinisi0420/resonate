@@ -626,6 +626,7 @@ export interface UserProfile {
   unit: string;
   initials: string;
   avatarColor: string;
+  avatarUrl?: string;
   bio: string;
   interests: string[];
   karmaCoins: number;

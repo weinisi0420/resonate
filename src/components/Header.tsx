@@ -1,30 +1,15 @@
-import { useState } from 'react';
-import { MapPin, ChevronDown, Check, Users, Home, Sun, Moon } from 'lucide-react';
-import { personaProfiles } from '@/data/mockData';
+import { MapPin, Home, Sun, Moon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
-const colorMap: Record<string, string> = {
-  terracotta: 'bg-rose-500 text-white',
-  sage: 'bg-sage-400 text-white',
-  sand: 'bg-rose-200 text-ink-800',
-};
-
 interface HeaderProps {
-  personaId: string;
-  onPersonaChange: (id: string) => void;
   isDarkMode?: boolean;
   onToggleDarkMode?: () => void;
 }
 
 export function Header({
-  personaId,
-  onPersonaChange,
   isDarkMode = false,
   onToggleDarkMode,
 }: HeaderProps) {
-  const [open, setOpen] = useState(false);
-  const active = personaProfiles.find((p) => p.id === personaId) ?? personaProfiles[0];
-
   return (
     <header
       className={cn(
@@ -55,7 +40,7 @@ export function Header({
             </div>
           </div>
 
-          {/* Night mode and persona */}
+          {/* Day and night mode */}
           <div className="flex items-center gap-1.5">
             {/* Top Right Night Mode Navigation Bar */}
             <div
@@ -96,60 +81,8 @@ export function Header({
               </button>
             </div>
 
-            {/* Persona Switcher */}
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className={cn(
-                'tap-scale flex items-center gap-1 rounded-full px-1.5 py-1 shadow-xs border transition-colors',
-                isDarkMode ? 'bg-[#2E1420] border-[#662E40]' : 'bg-white border-rose-200'
-              )}
-              aria-haspopup="true"
-              aria-expanded={open}
-            >
-              <span
-                className={cn(
-                  'flex h-6 w-6 items-center justify-center rounded-xl text-[11px] font-bold',
-                  colorMap[active.color] ?? 'bg-rose-500 text-white'
-                )}
-              >
-                {active.initials}
-              </span>
-              <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', isDarkMode ? 'text-white/80' : 'text-ink-700/50', open && 'rotate-180')} />
-            </button>
           </div>
         </div>
-
-        {open && (
-          <div className="mt-3 animate-pop origin-top rounded-3xl border border-rose-200 bg-white p-2 shadow-soft-lg">
-            <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink-700/50 flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5 text-rose-500" /> Switch demo persona
-            </p>
-            {personaProfiles.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => {
-                  onPersonaChange(p.id);
-                  setOpen(false);
-                }}
-                className="tap-scale flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left hover:bg-rose-50 transition-colors"
-              >
-                <span
-                  className={cn(
-                    'flex h-8 w-8 items-center justify-center rounded-xl text-xs font-semibold',
-                    colorMap[p.color]
-                  )}
-                >
-                  {p.initials}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-ink-800 truncate">{p.name}</p>
-                  <p className="text-xs text-ink-700/60 truncate">{p.role}</p>
-                </div>
-                {personaId === p.id && <Check className="h-4 w-4 text-sage-500" />}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </header>
   );
