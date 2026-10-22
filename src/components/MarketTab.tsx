@@ -17,6 +17,7 @@ export interface MarketListing {
 }
 
 interface MarketTabProps {
+  isDarkMode?: boolean;
   listings: MarketListing[];
   onCreate: (listing: MarketListing) => void;
   onWant: (listing: MarketListing) => void;
@@ -32,7 +33,7 @@ export const starterListings: MarketListing[] = [
   { id: 'market-3', title: 'Board game bundle', description: 'Two family games, all pieces included.', price: 10, image: '', seller: 'Sarah K.', unit: 'Unit 5A', initials: 'Sa', avatarColor: 'bg-rose-500' },
 ];
 
-export function MarketTab({ listings, onCreate, onWant, onDecision, currentUserName, onOpenChat, receivedGoods }: MarketTabProps) {
+export function MarketTab({ isDarkMode = false, listings, onCreate, onWant, onDecision, currentUserName, onOpenChat, receivedGoods }: MarketTabProps) {
   const [marketView, setMarketView] = useState<'find' | 'mine' | 'received'>('find');
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
@@ -50,7 +51,7 @@ export function MarketTab({ listings, onCreate, onWant, onDecision, currentUserN
   };
 
   return <section className="space-y-4 animate-fade-in pb-16">
-    <header className="flex items-center justify-between rounded-4xl border border-rose-100 bg-white/90 p-4 shadow-soft">
+    <header className={`flex items-center justify-between rounded-4xl border p-4 shadow-soft ${isDarkMode ? 'border-[#55435D] bg-[#241D32]/95' : 'border-rose-100 bg-white/90'}`}>
       <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-rose-500">Maplewood neighbors</p><h1 className="font-display text-2xl font-black text-ink-900">Market</h1><p className="mt-0.5 text-xs text-ink-700/60">Give good things a new home.</p></div>
       {marketView === 'mine' && <button onClick={() => setShowForm(true)} className="tap-scale flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#CB6375] to-[#EB99A7] px-3.5 py-2.5 text-xs font-bold text-white shadow-soft"><Plus className="h-4 w-4"/> List an item</button>}
     </header>

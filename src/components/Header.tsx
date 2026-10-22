@@ -1,4 +1,4 @@
-import { MapPin, Home, Sun, Moon } from 'lucide-react';
+import { Home, Sun, Moon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
 interface HeaderProps {
@@ -31,12 +31,8 @@ export function Header({
             </div>
             <div className="min-w-0">
               <h1 className={cn("font-display text-lg font-black tracking-tight leading-none truncate", isDarkMode ? "text-white" : "text-ink-900")}>
-                HomeSweetHome
+                Resonate
               </h1>
-              <div className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-[#CB6375]">
-                <MapPin className="h-2.5 w-2.5 shrink-0" />
-                <span className="truncate">Maplewood</span>
-              </div>
             </div>
           </div>
 

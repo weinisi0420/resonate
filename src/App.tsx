@@ -140,7 +140,7 @@ export default function App() {
           {
             id: `msg-${Date.now()}`,
             sender: 'me',
-            text: `Hi ${neighbor.name.split(' ')[0]}! Great to connect with you on HomeSweetHome.`,
+            text: `Hi ${neighbor.name.split(' ')[0]}! Great to connect with you on Resonate.`,
             time: 'Just now',
           },
         ],
@@ -446,6 +446,7 @@ export default function App() {
         )}
         {tab === 'market' && (
           <MarketTab
+            isDarkMode={isDarkMode}
             listings={marketListings}
             receivedGoods={[...receivedGoods, ...marketListings.filter((item) => item.requester === currentUserName && item.request === 'pending' && !receivedGoods.some((received) => received.id === item.id))]}
             currentUserName={currentUserName}
@@ -498,7 +499,7 @@ export default function App() {
 
       {tab !== 'map' && <footer className="mx-auto max-w-md px-4 pb-20 pt-2 text-center">
         <p className="flex items-center justify-center gap-1.5 text-xs font-medium text-ink-700/40">
-          HomeSweetHome <Heart className="h-3 w-3 fill-rose-400 text-rose-400" /> for Maplewood neighbors
+          Resonate <Heart className="h-3 w-3 fill-rose-400 text-rose-400" /> for neighbors
         </p>
       </footer>}
 
